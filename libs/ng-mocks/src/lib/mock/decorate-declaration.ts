@@ -6,6 +6,7 @@ import decorateInputs from '../common/decorate.inputs';
 import decorateMock from '../common/decorate.mock';
 import decorateOutputs from '../common/decorate.outputs';
 import decorateQueries from '../common/decorate.queries';
+import { isStandalone } from '../common/func.is-standalone';
 import { ngMocksMockConfig } from '../common/mock';
 import ngMocksUniverse from '../common/ng-mocks-universe';
 import mockNgDef from '../mock-module/mock-ng-def';
@@ -61,10 +62,8 @@ export default <T extends Component & Directive>(
   if (meta.selector !== undefined) {
     options.selector = meta.selector;
   }
-  // istanbul ignore else
-  if (meta.standalone !== undefined) {
-    options.standalone = meta.standalone;
-  }
+
+  options.standalone = meta.standalone === undefined ? isStandalone(source) : meta.standalone;
 
   if (meta.imports) {
     const [, { imports }] = mockNgDef({ imports: meta.imports, skipExports: true });

@@ -35,6 +35,17 @@ class TargetPipe implements PipeTransform {
   }
 }
 
+@Pipe({
+  name: 'target',
+})
+class TargetStandaloneLessPipe implements PipeTransform {
+  protected name = 'target';
+
+  public transform(value: any): string {
+    return `${this.name}${value}`;
+  }
+}
+
 class Target {
   public name = 'target';
 }
@@ -45,8 +56,9 @@ describe('MockDeclaration', () => {
       TargetComponent,
       TargetDirective,
       TargetPipe,
+      TargetStandaloneLessPipe,
     );
-    expect(mocks.length).toEqual(3);
+    expect(mocks.length).toEqual(4);
     expect(mocks[0].nameConstructor).toEqual(
       'MockMiddlewareComponentMockBase',
     );
@@ -54,9 +66,11 @@ describe('MockDeclaration', () => {
       'MockMiddlewareDirectiveMockBase',
     );
     expect(mocks[2].nameConstructor).toEqual('MockMiddlewareMock');
+    expect(mocks[3].nameConstructor).toEqual('MockMiddlewareMock');
     expect(mocks[0].name).toEqual('MockOfTargetComponent');
     expect(mocks[1].name).toEqual('MockOfTargetDirective');
     expect(mocks[2].name).toEqual('MockOfTargetPipe');
+    expect(mocks[3].name).toEqual('MockOfTargetStandaloneLessPipe');
   });
 
   it('should process components with an empty template correctly', () => {

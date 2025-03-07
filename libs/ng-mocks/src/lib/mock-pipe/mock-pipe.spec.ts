@@ -1,8 +1,14 @@
-import { Component, Pipe, PipeTransform } from '@angular/core';
+import {
+  Component,
+  NgModule,
+  Pipe,
+  PipeTransform,
+} from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 
 import { isMockedNgDefOf } from '../common/func.is-mocked-ng-def-of';
+import { MockModule } from '../mock-module/mock-module';
 
 import { MockPipe, MockPipes } from './mock-pipe';
 
@@ -11,7 +17,7 @@ export class ExamplePipe implements PipeTransform {
   public transform = (args: string): string => (args ? 'hi' : 'hi');
 }
 
-@Pipe({ name: 'anotherMockPipe', standalone: false })
+@Pipe({ name: 'anotherMockPipe', standalone: true })
 export class AnotherExamplePipe implements PipeTransform {
   public transform = (args: string): string => (args ? 'hi' : 'hi');
 }
@@ -27,6 +33,27 @@ export class AnotherExamplePipe implements PipeTransform {
   `,
 })
 export class ExampleComponent {
+  public someStuff = 'bah';
+}
+
+@NgModule({
+  declarations: [ExamplePipe],
+  exports: [ExamplePipe],
+})
+class TestModule {}
+
+@Component({
+  selector: 'example-component',
+  standalone: true,
+  imports: [TestModule, AnotherExamplePipe],
+  template: `
+    <span id="examplePipe">{{ someStuff | mockPipe: 'foo' }}</span>
+    <span id="anotherExamplePipe">{{
+      someStuff | anotherMockPipe: 'fighters'
+    }}</span>
+  `,
+})
+export class ExampleStandaloneComponent {
   public someStuff = 'bah';
 }
 
@@ -77,6 +104,40 @@ describe('MockPipe', () => {
           fixture.debugElement.query(By.css('#examplePipe'))
             .nativeElement.innerHTML,
         ).toEqual('foo');
+      });
+    });
+  });
+
+  describe('Base tests-jasmine - standalone', () => {
+    beforeEach(async () => {
+      return TestBed.configureTestingModule({
+        imports: [
+          ExampleStandaloneComponent,
+          MockPipe(AnotherExamplePipe),
+          MockModule(TestModule),
+        ],
+        declarations: [MockPipe(ExamplePipe, () => 'bla')],
+      }).compileComponents();
+    });
+
+    beforeEach(() => {
+      fixture = TestBed.createComponent(ExampleStandaloneComponent);
+      fixture.detectChanges();
+    });
+
+    it('should not display the word hi that is printed by the pipe, because it is replaced with its mock copy', () => {
+      expect(
+        fixture.debugElement.query(By.css('#anotherExamplePipe'))
+          .nativeElement.innerHTML,
+      ).toEqual('');
+    });
+
+    describe('with transform override', () => {
+      it('should return the result of the provided transform function', () => {
+        expect(
+          fixture.debugElement.query(By.css('#examplePipe'))
+            .nativeElement.innerHTML,
+        ).toEqual('bla');
       });
     });
   });
