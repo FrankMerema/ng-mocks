@@ -1,3 +1,5 @@
+import * as angularCore from '@angular/core';
+
 import { getNgType } from './func.get-ng-type';
 
 /**
@@ -7,6 +9,10 @@ export function isStandalone(declaration: any): boolean {
   const type = getNgType(declaration);
   if (!type || type === 'Injectable' || type === 'NgModule') {
     return false;
+  }
+
+  if (angularCore.isStandalone) {
+    return angularCore.isStandalone(declaration);
   }
 
   // here we don't use the angular/core isStandalone for backward compatibility

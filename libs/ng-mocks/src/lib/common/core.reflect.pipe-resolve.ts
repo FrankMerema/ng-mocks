@@ -9,9 +9,7 @@ export default (def: any): Pipe & { standalone?: boolean } =>
   coreReflectBodyCatch((arg: any) => {
     const declaration = collectDeclarations(arg);
     if (declaration.Pipe) {
-      if (declaration.Pipe.standalone === undefined) {
-        declaration.Pipe.standalone = isStandalone(def);
-      }
+      declaration.Pipe.standalone = isStandalone(def);
 
       return declaration.Pipe;
     }
